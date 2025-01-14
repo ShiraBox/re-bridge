@@ -5,10 +5,16 @@ import java.net.URI
 import java.util.regex.Pattern
 
 
-class RedirectBridge {
+object RedirectBridge {
     private val client = OkHttpClient()
     private val headersJson: String = RedirectBridge::class.java.getResource("headers.json")!!.readText()
     private val payloadJson: String = RedirectBridge::class.java.getResource("payload.json")!!.readText()
+    private val _cachedHeaders: HashMap<String, Map<String, String>> = hashMapOf()
+
+    /**
+     * Stores headers (cookies) for specific host
+     */
+    val cachedHeaders: HashMap<String, Map<String, String>> get() = _cachedHeaders
 
     fun execute(target: String): Response {
         val headers = JsonParser.parseString(headersJson).asJsonObject.asMap().mapValues { it.value.asString }
@@ -19,7 +25,8 @@ class RedirectBridge {
         val request = Request.Builder()
             .url(target)
             .apply {
-                headers.forEach { (key, value) -> addHeader(key, value) }
+                _cachedHeaders[hostName]?.forEach { (key, value) -> addHeader(key, value) }
+                if (_cachedHeaders[hostName] == null) headers.forEach { (key, value) -> addHeader(key, value) }
             }
             .build()
 
@@ -28,7 +35,6 @@ class RedirectBridge {
             val checkCookies = mutableListOf<String>()
 
             if (!response.isSuccessful) {
-
                 val checkRequest = Request.Builder()
                     .url("https://check.ddos-guard.net/check.js")
                     .apply {
@@ -95,6 +101,7 @@ class RedirectBridge {
                                 addHeader("Cookie", originCookies.joinToString(";") + checkCookies.joinToString(";"))
                             }
                             .build()
+                        _cachedHeaders[hostName] = endRequest.headers.toMap()
 
                         return client.newCall(endRequest).execute()
                     }
