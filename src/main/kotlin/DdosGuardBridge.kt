@@ -5,10 +5,10 @@ import java.net.URI
 import java.util.regex.Pattern
 
 
-object RedirectBridge {
+object DdosGuardBridge {
     private val client = OkHttpClient()
-    private val headersJson: String = RedirectBridge::class.java.getResource("headers.json")!!.readText()
-    private val payloadJson: String = RedirectBridge::class.java.getResource("payload.json")!!.readText()
+    private val headersJson: String = DdosGuardBridge::class.java.getResource("headers.json")!!.readText()
+    private val payloadJson: String = DdosGuardBridge::class.java.getResource("payload.json")!!.readText()
     private val _cachedHeaders: HashMap<String, Map<String, String>> = hashMapOf()
 
     /**

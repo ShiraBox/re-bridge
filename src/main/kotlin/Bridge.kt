@@ -6,14 +6,14 @@ import java.net.URI
  *
  * @param   url     target url
  */
-fun Request.Builder.reBridge(url: String): Request.Builder {
+fun Request.Builder.ddosGuardBridge(url: String): Request.Builder {
     val hostName = URI(url).host
-    val cachedHeaders = RedirectBridge.cachedHeaders[hostName]
+    val cachedHeaders = DdosGuardBridge.cachedHeaders[hostName]
 
     if (cachedHeaders != null) {
         cachedHeaders.forEach { (key, value) -> addHeader(key, value) }
     } else {
-        val reference = RedirectBridge.execute(url)
+        val reference = DdosGuardBridge.execute(url)
         reference.request.headers.forEach { (key, value) -> addHeader(key, value) }
     }
 
